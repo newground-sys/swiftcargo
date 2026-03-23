@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swift Cargo</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#0d0f14;
+  color:#e8eaf0;
+  font-family: Arial, sans-serif;
+  min-height:100vh;
+}
+
+/* NAV */
+nav {
+  background:#111318;
+  border-bottom:2px solid #00c87a;
+  padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+}
+.logo { font-size:1.3rem; font-weight:900; letter-spacing:2px; color:#fff; }
+.logo span { color:#00c87a; }
+.nav-tabs { display:flex; gap:6px; }
+.tab-btn {
+  background:transparent; border:1px solid #2a2d3a;
+  color:#8a8fa8; font-size:0.72rem; padding:7px 12px;
+  cursor:pointer; letter-spacing:1px; text-transform:uppercase;
+  transition:all 0.2s;
+}
+.tab-btn.active, .tab-btn:hover { background:#00c87a; color:#000; border-color:#00c87a; font-weight:700; }
+
+/* PAGES */
+.page { display:none; padding:16px; }
+.page.active { display:block; }
+
+/* CARDS */
+.card {
+  background:#111318;
+  border:1px solid #1e2130;
+  border-radius:4px;
+  padding:18px;
+  margin-bottom:14px;
+}
+.card-title {
+  font-size:0.65rem; letter-spacing:2px; text-transform:uppercase;
+  color:#5a607a; margin-bottom:16px;
+  padding-bottom:10px; border-bottom:1px solid #1e2130;
+}
+
+/* FORM */
+.field { margin-bottom:12px; }
+.field label { display:block; font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:#5a607a; margin-bottom:5px; }
+.field input, .field select, .field textarea {
+  width:100%; background:#0a0b10; border:1px solid #1e2130;
+  color:#e8eaf0; font-size:0.9rem; padding:10px 12px;
+  outline:none; border-radius:2px; font-family:Arial,sans-serif;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color:#00c87a; }
+.field select option { background:#0a0b10; }
+.field textarea { resize:vertical; min-height:60px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+/* BUTTONS */
+.btn {
+  width:100%; padding:13px; border:none; font-size:0.85rem;
+  font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; border-radius:2px; transition:all 0.2s;
+}
+.btn-green { background:#00c87a; color:#000; }
+.btn-green:hover { background:#00e58a; }
+.btn-blue { background:#3d8bff; color:#fff; }
+.btn-blue:hover { background:#5aa3ff; }
+.btn-outline {
+  background:transparent; border:1px solid #00c87a; color:#00c87a;
+  padding:9px 16px; font-size:0.75rem; font-weight:700;
+  letter-spacing:1px; text-transform:uppercase; cursor:pointer;
+  border-radius:2px; transition:all 0.2s;
+}
+.btn-outline:hover { background:#00c87a; color:#000; }
+.btn-sm {
+  padding:7px 14px; font-size:0.7rem; border:none; font-weight:700;
+  letter-spacing:1px; text-transform:uppercase; cursor:pointer;
+  border-radius:2px; transition:all 0.2s;
+}
+.btn-sm-green { background:#00c87a; color:#000; }
+.btn-sm-red { background:#ff4757; color:#fff; }
+.btn-sm-blue { background:#3d8bff; color:#fff; }
+.btn-sm-orange { background:#ff6b35; color:#fff; }
+
+/* RESULT BOX */
+.result-box {
+  background:#0a0b10; border:1px solid #00c87a; border-radius:4px;
+  padding:16px; margin-top:12px; display:none;
+}
+.result-box.show { display:block; }
+.big-code {
+  font-family:monospace; font-size:1.3rem; font-weight:700;
+  color:#00c87a; letter-spacing:3px; word-break:break-all;
+  margin-bottom:12px;
+}
+.meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.meta-item label { font-size:0.6rem; color:#5a607a; text-transform:uppercase; letter-spacing:1px; display:block; }
+.meta-item span { font-size:0.85rem; }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* SHIPMENT LIST */
+.ship-card {
+  background:#0a0b10; border-left:3px solid #3d8bff;
+  border-radius:2px; padding:14px; margin-bottom:10px;
+  cursor:pointer; transition:all 0.2s;
+}
+.ship-card:hover, .ship-card.active { border-left-color:#00c87a; background:#0f1017; }
+.ship-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px; }
+.ship-code { font-family:monospace; font-size:0.8rem; color:#00c87a; font-weight:700; }
+.badge {
+  font-size:0.6rem; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; padding:3px 8px; border-radius:2px;
+}
+.badge-transit { background:rgba(61,139,255,0.2); color:#3d8bff; }
+.badge-delivered { background:rgba(0,200,122,0.2); color:#00c87a; }
+.badge-pending { background:rgba(255,211,42,0.2); color:#ffd32a; }
+.badge-exception { background:rgba(255,71,87,0.2); color:#ff4757; }
+.ship-route { font-size:0.85rem; margin-bottom:3px; }
+.ship-sub { font-size:0.75rem; color:#5a607a; }
+.progress-wrap { margin-top:10px; }
+.prog-bar { height:4px; background:#1e2130; border-radius:2px; margin-top:4px; }
+.prog-fill { height:100%; background:#3d8bff; border-radius:2px; transition:width 0.5s; }
+.prog-fill.done { background:#00c87a; }
+
+/* TIMELINE */
+.tl-wrap { }
+.tl-info { margin-bottom:18px; }
+.tl-big-code { font-family:monospace; font-size:1.1rem; color:#00c87a; font-weight:700; margin-bottom:4px; }
+.tl-route { font-size:1rem; margin-bottom:10px; }
+.tl-meta { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.tl-meta-item label { font-size:0.6rem; color:#5a607a; text-transform:uppercase; letter-spacing:1px; display:block; }
+.tl-meta-item span { font-size:0.82rem; }
+
+/* MANUAL CONTROLS */
+.controls-box {
+  background:#0a0b10; border:1px solid #2a2d3a;
+  border-radius:4px; padding:14px; margin-bottom:16px;
+}
+.controls-title { font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:#5a607a; margin-bottom:10px; }
+.stage-btns { display:flex; flex-wrap:wrap; gap:6px; }
+.stage-btn {
+  padding:7px 10px; font-size:0.68rem; border:1px solid #2a2d3a;
+  background:transparent; color:#8a8fa8; cursor:pointer;
+  border-radius:2px; letter-spacing:0.5px; transition:all 0.2s;
+  text-align:center;
+}
+.stage-btn:hover { border-color:#3d8bff; color:#3d8bff; }
+.stage-btn.current { border-color:#00c87a; color:#00c87a; background:rgba(0,200,122,0.1); font-weight:700; }
+.stage-btn.done { border-color:#1e2130; color:#3a3f55; background:transparent; }
+.stage-btn.delivered-btn { border-color:#00c87a; }
+.stage-btn.delivered-btn:hover { background:rgba(0,200,122,0.15); color:#00c87a; }
+.stage-btn.exception-btn { border-color:#ff4757; }
+.stage-btn.exception-btn:hover { background:rgba(255,71,87,0.15); color:#ff4757; }
+
+/* EVENTS */
+.events-list { }
+.ev-item { display:flex; gap:12px; padding-bottom:18px; position:relative; }
+.ev-item::before {
+  content:''; position:absolute; left:10px; top:22px;
+  width:1px; height:calc(100% - 6px); background:#1e2130;
+}
+.ev-item:last-child::before { display:none; }
+.ev-dot {
+  width:22px; height:22px; border-radius:50%; flex-shrink:0;
+  border:2px solid #1e2130; background:#111318;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.6rem; margin-top:2px;
+}
+.ev-dot.done { border-color:#00c87a; background:rgba(0,200,122,0.1); color:#00c87a; }
+.ev-dot.current { border-color:#3d8bff; background:rgba(61,139,255,0.15); color:#3d8bff; }
+.ev-dot.future { color:#2a2d3a; }
+.ev-text { flex:1; }
+.ev-name { font-size:0.88rem; font-weight:500; }
+.ev-loc { font-size:0.72rem; color:#5a607a; }
+.ev-time { font-size:0.68rem; color:#5a607a; font-family:monospace; }
+
+/* SHARE BOX */
+.share-box {
+  background:#0a0b10; border:1px solid #3d8bff;
+  border-radius:4px; padding:14px; margin-top:14px;
+}
+.share-title { font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:#3d8bff; margin-bottom:8px; }
+.share-link {
+  font-family:monospace; font-size:0.72rem; color:#e8eaf0;
+  word-break:break-all; background:#111318; padding:8px 10px;
+  border-radius:2px; margin-bottom:8px; border:1px solid #1e2130;
+}
+.share-note { font-size:0.7rem; color:#5a607a; margin-bottom:10px; line-height:1.5; }
+
+/* STATS */
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.stat-box { background:#0a0b10; border:1px solid #1e2130; border-radius:4px; padding:14px; text-align:center; }
+.stat-num { font-size:2rem; font-weight:900; line-height:1; }
+.stat-label { font-size:0.65rem; color:#5a607a; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+.green-num { color:#00c87a; }
+.blue-num { color:#3d8bff; }
+.orange-num { color:#ff6b35; }
+.red-num { color:#ff4757; }
+
+/* TRACKER PAGE (public) */
+.track-page { max-width:500px; margin:0 auto; padding:24px 16px; }
+.track-hero { text-align:center; margin-bottom:28px; }
+.track-hero .logo { font-size:1.6rem; margin-bottom:8px; }
+.track-hero p { font-size:0.85rem; color:#5a607a; }
+.track-search { display:flex; gap:0; margin-bottom:20px; }
+.track-search input {
+  flex:1; background:#111318; border:1px solid #1e2130; border-right:none;
+  color:#e8eaf0; font-size:0.9rem; padding:12px 14px; outline:none;
+  font-family:monospace;
+}
+.track-search input:focus { border-color:#00c87a; }
+.track-search button {
+  background:#00c87a; border:none; color:#000; padding:12px 18px;
+  font-size:0.75rem; font-weight:700; cursor:pointer; letter-spacing:1px;
+  text-transform:uppercase;
+}
+.track-result { }
+.not-found { text-align:center; padding:30px 16px; color:#5a607a; font-size:0.85rem; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:#00c87a; color:#000; font-size:0.8rem; font-weight:700;
+  padding:11px 20px; border-radius:4px; z-index:999;
+  transition:transform 0.3s ease; letter-spacing:1px; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* EMPTY */
+.empty-state { text-align:center; padding:40px 16px; color:#5a607a; }
+.empty-icon { font-size:2.5rem; margin-bottom:10px; opacity:0.4; }
+.empty-text { font-size:0.8rem; letter-spacing:1px; text-transform:uppercase; }
+
+/* DIVIDER */
+.divider { height:1px; background:#1e2130; margin:14px 0; }
+
+@media(max-width:400px) {
+  .row2 { grid-template-columns:1fr; }
+  .stats-grid { grid-template-columns:1fr 1fr; }
+  .stage-btn { font-size:0.62rem; padding:6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">SWIFT <span>CARGO</span></div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('tracker')">Track</button>
+  </div>
+</nav>
+
+<!-- ═══ DASHBOARD PAGE ═══ -->
+<div class="page active" id="page-dashboard">
+
+  <!-- STATS -->
+  <div style="padding:16px 16px 0">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num green-num" id="statDelivered">0</div><div class="stat-label">Delivered</div></div>
+      <div class="stat-box"><div class="stat-num blue-num" id="statTransit">0</div><div class="stat-label">In Transit</div></div>
+      <div class="stat-box"><div class="stat-num orange-num" id="statPending">0</div><div class="stat-label">Pending</div></div>
+      <div class="stat-box"><div class="stat-num red-num" id="statException">0</div><div class="stat-label">Exceptions</div></div>
+    </div>
+  </div>
+
+  <!-- GENERATOR -->
+  <div style="padding:0 16px">
+    <div class="card">
+      <div class="card-title">Generate Tracking Code</div>
+      <div class="row2">
+        <div class="field"><label>Carrier</label>
+          <select id="gCarrier">
+            <option value="SCX">Swift Cargo</option>
+            <option value="FDX">FedEx</option>
+            <option value="UPS">UPS</option>
+            <option value="DHL">DHL</option>
+            <option value="USPS">USPS</option>
+          </select>
+        </div>
+        <div class="field"><label>Service</label>
+          <select id="gService">
+            <option value="EX">Express</option>
+            <option value="SD">Same-Day</option>
+            <option value="GD">Ground</option>
+            <option value="INT">International</option>
+            <option value="FR">Freight</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Origin City</label><input type="text" id="gOrigin" placeholder="e.g. Miami, FL"></div>
+        <div class="field"><label>Destination City</label><input type="text" id="gDest" placeholder="e.g. New York, NY"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Weight (lbs)</label><input type="number" id="gWeight" placeholder="0.0" min="0" step="0.1"></div>
+        <div class="field"><label>Package Type</label>
+          <select id="gPkg">
+            <option value="Package">Package</option>
+            <option value="Envelope">Envelope</option>
+            <option value="Pallet">Pallet</option>
+            <option value="Box">Box</option>
+            <option value="Tube">Tube</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Recipient Name</label><input type="text" id="gRecipient" placeholder="Full name"></div>
+      <div class="field"><label>Recipient Phone / Email (optional)</label><input type="text" id="gContact" placeholder="For sharing tracking link"></div>
+      <button class="btn btn-green" onclick="generateCode()">⚡ Generate Tracking Code</button>
+
+      <div class="result-box" id="resultBox">
+        <div style="font-size:0.6rem;color:#5a607a;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Tracking Code</div>
+        <div class="big-code" id="resultCode"></div>
+        <div class="meta-grid" id="resultMeta"></div>
+        <div class="btn-row">
+          <button class="btn-outline" onclick="copyCode()">⎘ Copy Code</button>
+          <button class="btn-outline" style="border-color:#3d8bff;color:#3d8bff" onclick="addToList()">+ Add to Dashboard</button>
+        </div>
+        <div class="share-box" id="shareBox" style="display:none">
+          <div class="share-title">📤 Share Tracking Link</div>
+          <div class="share-link" id="shareLink"></div>
+          <div class="share-note">Send this link to your customer. They can open it in any browser and enter the tracking code to see real-time updates.</div>
+          <div class="btn-row">
+            <button class="btn-outline" style="font-size:0.68rem" onclick="copyShareLink()">⎘ Copy Link</button>
+            <button class="btn-outline" style="border-color:#ff6b35;color:#ff6b35;font-size:0.68rem" onclick="shareViaApp()">↗ Share via App</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHIPMENT LIST -->
+  <div style="padding:0 16px">
+    <div class="card">
+      <div class="card-title">Shipments</div>
+      <div id="shipList">
+        <div class="empty-state">
+          <div class="empty-icon">📦</div>
+          <div class="empty-text">No shipments yet<br>Generate a code above</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TRACKER PAGE ═══ -->
+<div class="page" id="page-tracker">
+  <div class="track-page">
+    <div class="track-hero">
+      <div class="logo" style="font-size:1.5rem;margin-bottom:8px">SWIFT <span style="color:#00c87a">CARGO</span></div>
+      <p>Enter your tracking code below to see live updates</p>
+    </div>
+    <div class="track-search">
+      <input type="text" id="pubTrackInput" placeholder="e.g. SCX-EX-AB1234" style="font-size:0.85rem" onkeydown="if(event.key==='Enter')publicTrack()">
+      <button onclick="publicTrack()">Track</button>
+    </div>
+    <div id="pubResult"></div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL (slide up) -->
+<div id="detailModal" style="display:none;position:fixed;inset:0;background:#0d0f14;z-index:200;overflow-y:auto;">
+  <div style="padding:0 16px 40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
+      <div class="logo" style="font-size:1rem">SWIFT <span>CARGO</span></div>
+      <button onclick="closeDetail()" style="background:transparent;border:1px solid #2a2d3a;color:#e8eaf0;padding:7px 14px;font-size:0.75rem;cursor:pointer;border-radius:2px;">✕ Close</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══ STATE ═══════════════════════════════════════════════════════════
+const STAGES = [
+  { key:'created',    label:'Label Created',              icon:'📋' },
+  { key:'received',   label:'Package Received',           icon:'📦' },
+  { key:'departed',   label:'Departed Origin Facility',   icon:'🏭' },
+  { key:'transit',    label:'In Transit',                 icon:'🚛' },
+  { key:'hub',        label:'Arrived at Sorting Hub',     icon:'🔄' },
+  { key:'outdelivery',label:'Out for Delivery',           icon:'🚚' },
+  { key:'delivered',  label:'Delivered',                  icon:'✅' },
+];
+const EXCEPTION_STAGE = { key:'exception', label:'Exception: Delivery Issue', icon:'⚠️' };
+
+let shipments = [];
+let currentDetail = null;
+
+// ═══ TAB SWITCH ══════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if(tab==='tracker') {
+    const url = window.location.href.split('?')[0];
+    document.getElementById('pubTrackInput').value = '';
+    document.getElementById('pubResult').innerHTML = '';
+  }
+}
+
+// ═══ GENERATE CODE ═══════════════════════════════════════════════════
+function generateCode() {
+  const carrier   = document.getElementById('gCarrier').value;
+  const service   = document.getElementById('gService').value;
+  const origin    = document.getElementById('gOrigin').value.trim() || 'Origin';
+  const dest      = document.getElementById('gDest').value.trim() || 'Destination';
+  const weight    = document.getElementById('gWeight').value || '—';
+  const pkgType   = document.getElementById('gPkg').value;
+  const recipient = document.getElementById('gRecipient').value.trim() || '—';
+  const contact   = document.getElementById('gContact').value.trim() || '';
+
+  const rand = () => Math.random().toString(36).substring(2,6).toUpperCase();
+  const num  = () => Math.floor(Math.random()*9000+1000);
+  const code = `${carrier}-${service}-${rand()}${num()}`;
+
+  const ship = {
+    id: code, carrier, service, origin, dest,
+    weight, pkgType, recipient, contact,
+    status: 'pending',
+    stageIndex: 0,
+    events: [{ ...STAGES[0], loc: origin, time: now(), done: true, current: false }],
+    created: new Date().toISOString(),
+    eta: calcETA(service)
+  };
+
+  document.getElementById('resultCode').textContent = code;
+  document.getElementById('resultMeta').innerHTML = metaHTML(ship);
+
+  const shareURL = `${window.location.href.split('?')[0]}?track=${encodeURIComponent(code)}`;
+  document.getElementById('shareLink').textContent = shareURL;
+  document.getElementById('shareBox').style.display = 'block';
+
+  document.getElementById('resultBox').classList.add('show');
+  window._pendingShip = ship;
+  showToast('Tracking code generated!');
+}
+
+function calcETA(service) {
+  const days = { EX:2, SD:1, GD:7, INT:14, FR:10 };
+  const d = new Date();
+  d.setDate(d.getDate() + (days[service]||3));
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function metaHTML(s) {
+  const carrierNames = {SCX:'Swift Cargo',FDX:'FedEx',UPS:'UPS',DHL:'DHL',USPS:'USPS'};
+  const serviceNames = {EX:'Express',SD:'Same-Day',GD:'Ground',INT:'International',FR:'Freight'};
+  return `
+    <div class="meta-item"><label>Carrier</label><span>${carrierNames[s.carrier]||s.carrier}</span></div>
+    <div class="meta-item"><label>Service</label><span>${serviceNames[s.service]||s.service}</span></div>
+    <div class="meta-item"><label>From</label><span>${s.origin}</span></div>
+    <div class="meta-item"><label>To</label><span>${s.dest}</span></div>
+    <div class="meta-item"><label>Weight</label><span>${s.weight} lbs</span></div>
+    <div class="meta-item"><label>Type</label><span>${s.pkgType}</span></div>
+    <div class="meta-item"><label>Recipient</label><span>${s.recipient}</span></div>
+    <div class="meta-item"><label>ETA</label><span style="color:#00c87a">${s.eta}</span></div>
+  `;
+}
+
+function copyCode() {
+  const code = document.getElementById('resultCode').textContent;
+  navigator.clipboard ? navigator.clipboard.writeText(code).then(()=>showToast('Copied!')) : fallbackCopy(code);
+}
+
+function copyShareLink() {
+  const link = document.getElementById('shareLink').textContent;
+  navigator.clipboard ? navigator.clipboard.writeText(link).then(()=>showToast('Link copied!')) : fallbackCopy(link);
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  showToast('Copied!');
+}
+
+function shareViaApp() {
+  const link = document.getElementById('shareLink').textContent;
+  const code = document.getElementById('resultCode').textContent;
+  if(navigator.share) {
+    navigator.share({ title:'Swift Cargo Tracking', text:`Track your package with Swift Cargo. Code: ${code}`, url: link });
+  } else {
+    copyShareLink();
+    showToast('Link copied — paste to share!');
+  }
+}
+
+function addToList() {
+  if(!window._pendingShip) return;
+  if(shipments.find(s=>s.id===window._pendingShip.id)) { showToast('Already added'); return; }
+  shipments.unshift(window._pendingShip);
+  renderList();
+  updateStats();
+  showToast('Added to dashboard!');
+}
+
+// ═══ LIST ═════════════════════════════════════════════════════════════
+function renderList() {
+  const el = document.getElementById('shipList');
+  if(!shipments.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No shipments yet<br>Generate a code above</div></div>';
+    return;
+  }
+  el.innerHTML = shipments.map(s => {
+    const prog = Math.round((s.stageIndex / (STAGES.length-1)) * 100);
+    const st = statusInfo(s);
+    return `
+      <div class="ship-card ${currentDetail===s.id?'active':''}" onclick="openDetail('${s.id}')">
+        <div class="ship-card-top">
+          <div class="ship-code">${s.id}</div>
+          <div class="badge ${st.cls}">${st.label}</div>
+        </div>
+        <div class="ship-route">${s.origin} → ${s.dest}</div>
+        <div class="ship-sub">${s.recipient} · ETA: ${s.eta}</div>
+        <div class="progress-wrap">
+          <div class="prog-bar"><div class="prog-fill ${s.status==='delivered'?'done':''}" style="width:${prog}%"></div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function statusInfo(s) {
+  if(s.status==='delivered') return {label:'Delivered', cls:'badge-delivered'};
+  if(s.status==='exception') return {label:'Exception',  cls:'badge-exception'};
+  if(s.stageIndex===0)       return {label:'Pending',    cls:'badge-pending'};
+  return {label:'In Transit', cls:'badge-transit'};
+}
+
+function updateStats() {
+  document.getElementById('statDelivered').textContent = shipments.filter(s=>s.status==='delivered').length;
+  document.getElementById('statTransit').textContent   = shipments.filter(s=>s.status==='transit').length;
+  document.getElementById('statPending').textContent   = shipments.filter(s=>s.stageIndex===0&&s.status!=='exception').length;
+  document.getElementById('statException').textContent = shipments.filter(s=>s.status==='exception').length;
+}
+
+// ═══ DETAIL / MANUAL CONTROL ══════════════════════════════════════════
+function openDetail(id) {
+  const s = shipments.find(x=>x.id===id);
+  if(!s) return;
+  currentDetail = id;
+  renderDetail(s);
+  document.getElementById('detailModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  renderList();
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').style.display = 'none';
+  document.body.style.overflow = '';
+  currentDetail = null;
+  renderList();
+}
+
+function renderDetail(s) {
+  const carrierNames = {SCX:'Swift Cargo',FDX:'FedEx',UPS:'UPS',DHL:'DHL',USPS:'USPS'};
+  const serviceNames = {EX:'Express',SD:'Same-Day',GD:'Ground',INT:'International',FR:'Freight'};
+  const st = statusInfo(s);
+  const shareURL = `${window.location.href.split('?')[0]}?track=${encodeURIComponent(s.id)}`;
+
+  // Build stage buttons
+  const stageBtns = STAGES.map((stage, i) => {
+    let cls = '';
+    if(i < s.stageIndex) cls = 'done';
+    else if(i === s.stageIndex) cls = 'current';
+    const disabled = s.status==='delivered' || s.status==='exception' ? 'disabled style="opacity:0.4;cursor:not-allowed"' : '';
+    return `<button class="stage-btn ${cls}" onclick="advanceToStage('${s.id}',${i})" ${disabled}>${stage.icon} ${stage.label}</button>`;
+  }).join('');
+
+  // Build events
+  const evHTML = [...s.events].reverse().map((ev,i) => `
+    <div class="ev-item">
+      <div class="ev-dot ${i===0&&s.status!=='delivered'?'current':'done'}">${i===0&&s.status!=='delivered'?'●':'✓'}</div>
+      <div class="ev-text">
+        <div class="ev-name">${ev.icon} ${ev.label}</div>
+        <div class="ev-loc">${ev.loc||''}</div>
+        <div class="ev-time">${ev.time}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="card" style="margin-bottom:10px">
+      <div class="tl-big-code">${s.id}</div>
+      <div class="tl-route">${s.origin} → ${s.dest}</div>
+      <div style="display:inline-block" class="badge ${st.cls} " style="margin-bottom:10px">${st.label}</div>
+      <div class="tl-meta" style="margin-top:10px">
+        <div class="tl-meta-item"><label>Carrier</label><span>${carrierNames[s.carrier]||s.carrier}</span></div>
+        <div class="tl-meta-item"><label>Service</label><span>${serviceNames[s.service]||s.service}</span></div>
+        <div class="tl-meta-item"><label>Weight</label><span>${s.weight} lbs</span></div>
+        <div class="tl-meta-item"><label>Type</label><span>${s.pkgType}</span></div>
+        <div class="tl-meta-item"><label>Recipient</label><span>${s.recipient}</span></div>
+        <div class="tl-meta-item"><label>ETA</label><span style="color:#00c87a">${s.eta}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title">Manual Stage Control — Tap to Update</div>
+      <div class="controls-box" style="border:none;padding:0;background:transparent">
+        <div class="stage-btns">${stageBtns}</div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm btn-sm-red" onclick="markException('${s.id}')">⚠ Mark Exception</button>
+        <button class="btn-sm btn-sm-blue" onclick="copyTrackingLink('${s.id}')">⎘ Copy Share Link</button>
+        <button class="btn-sm btn-sm-orange" onclick="shareShipment('${s.id}')">↗ Share</button>
+        <button class="btn-sm" style="background:#2a2d3a;color:#ff4757" onclick="deleteShipment('${s.id}')">🗑 Delete</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Event Timeline</div>
+      <div class="events-list">${evHTML}</div>
+    </div>
+  `;
+}
+
+function advanceToStage(id, stageIndex) {
+  const s = shipments.find(x=>x.id===id);
+  if(!s || s.status==='delivered' || s.status==='exception') return;
+  if(stageIndex <= s.stageIndex) { showToast('Already at or past this stage'); return; }
+
+  // Add all stages between current and target
+  for(let i = s.stageIndex + 1; i <= stageIndex; i++) {
+    const stage = STAGES[i];
+    s.events.push({
+      ...stage,
+      loc: i >= STAGES.length - 2 ? s.dest : `${s.origin} → ${s.dest}`,
+      time: now(),
+      done: true
+    });
+  }
+  s.stageIndex = stageIndex;
+  if(stageIndex === STAGES.length - 1) {
+    s.status = 'delivered';
+    s.eta = 'Delivered';
+    showToast('✅ Marked as Delivered!');
+  } else {
+    s.status = 'transit';
+    showToast(`Updated: ${STAGES[stageIndex].label}`);
+  }
+  renderDetail(s);
+  renderList();
+  updateStats();
+}
+
+function markException(id) {
+  const s = shipments.find(x=>x.id===id);
+  if(!s) return;
+  s.status = 'exception';
+  s.events.push({ ...EXCEPTION_STAGE, loc: s.dest, time: now(), done: true });
+  showToast('⚠ Exception marked');
+  renderDetail(s);
+  renderList();
+  updateStats();
+}
+
+function deleteShipment(id) {
+  if(!confirm('Delete this shipment?')) return;
+  shipments = shipments.filter(s=>s.id!==id);
+  closeDetail();
+  renderList();
+  updateStats();
+  showToast('Deleted');
+}
+
+function copyTrackingLink(id) {
+  const url = `${window.location.href.split('?')[0]}?track=${encodeURIComponent(id)}`;
+  navigator.clipboard ? navigator.clipboard.writeText(url).then(()=>showToast('Link copied!')) : fallbackCopy(url);
+}
+
+function shareShipment(id) {
+  const url = `${window.location.href.split('?')[0]}?track=${encodeURIComponent(id)}`;
+  if(navigator.share) {
+    navigator.share({ title:'Swift Cargo Tracking', text:`Track your Swift Cargo package: ${id}`, url });
+  } else {
+    copyTrackingLink(id);
+  }
+}
+
+// ═══ PUBLIC TRACKER ═══════════════════════════════════════════════════
+function publicTrack() {
+  const input = document.getElementById('pubTrackInput').value.trim().toUpperCase();
+  if(!input) return;
+  const s = shipments.find(x => x.id.toUpperCase() === input || x.id.toUpperCase().includes(input));
+  renderPublicResult(s);
+}
+
+function renderPublicResult(s) {
+  const el = document.getElementById('pubResult');
+  if(!s) {
+    el.innerHTML = `<div class="not-found">📦 No shipment found.<br>Please check the tracking code and try again.</div>`;
+    return;
+  }
+  const st = statusInfo(s);
+  const prog = Math.round((s.stageIndex / (STAGES.length-1)) * 100);
+  const evHTML = [...s.events].reverse().map((ev,i) => `
+    <div class="ev-item">
+      <div class="ev-dot ${i===0&&s.status!=='delivered'?'current':'done'}">${i===0&&s.status!=='delivered'?'●':'✓'}</div>
+      <div class="ev-text">
+        <div class="ev-name">${ev.icon} ${ev.label}</div>
+        <div class="ev-loc">${ev.loc||''}</div>
+        <div class="ev-time">${ev.time}</div>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="tl-big-code">${s.id}</div>
+      <div class="tl-route" style="margin-bottom:6px">${s.origin} → ${s.dest}</div>
+      <span class="badge ${st.cls}">${st.label}</span>
+      <div class="prog-bar" style="margin-top:12px"><div class="prog-fill ${s.status==='delivered'?'done':''}" style="width:${prog}%"></div></div>
+      <div style="font-size:0.72rem;color:#5a607a;margin-top:4px">Progress: ${prog}%</div>
+    </div>
+    <div class="card">
+      <div class="tl-meta">
+        <div class="tl-meta-item"><label>Recipient</label><span>${s.recipient}</span></div>
+        <div class="tl-meta-item"><label>ETA</label><span style="color:#00c87a">${s.eta}</span></div>
+        <div class="tl-meta-item"><label>From</label><span>${s.origin}</span></div>
+        <div class="tl-meta-item"><label>To</label><span>${s.dest}</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Timeline</div>
+      <div class="events-list">${evHTML}</div>
+    </div>`;
+}
+
+// ═══ DEEP LINK — auto-open tracker from URL param ══════════════════════
+function checkDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('track');
+  if(code) {
+    switchTabDirect('tracker');
+    document.getElementById('pubTrackInput').value = decodeURIComponent(code);
+    setTimeout(publicTrack, 100);
+  }
+}
+
+function switchTabDirect(tab) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  const btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(b=>{ if(b.textContent.toLowerCase().includes(tab)) b.classList.add('active'); });
+}
+
+// ═══ HELPERS ══════════════════════════════════════════════════════════
+function now() {
+  return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ═══ INIT ══════════════════════════════════════════════════════════════
+checkDeepLink();
+</script>
+</body>
+</html>
