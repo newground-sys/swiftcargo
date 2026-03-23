@@ -381,6 +381,17 @@ nav {
 <div class="toast" id="toast"></div>
 
 <script>
+// ═══ SAVE & LOAD (localStorage) ══════════════════════════════════════
+function saveShipments() {
+  try { localStorage.setItem('swiftcargo_shipments', JSON.stringify(shipments)); } catch(e) {}
+}
+function loadShipments() {
+  try {
+    const data = localStorage.getItem('swiftcargo_shipments');
+    if(data) shipments = JSON.parse(data);
+  } catch(e) { shipments = []; }
+}
+
 // ═══ STATE ═══════════════════════════════════════════════════════════
 const STAGES = [
   { key:'created',    label:'Label Created',              icon:'📋' },
@@ -500,6 +511,7 @@ function addToList() {
   if(!window._pendingShip) return;
   if(shipments.find(s=>s.id===window._pendingShip.id)) { showToast('Already added'); return; }
   shipments.unshift(window._pendingShip);
+  saveShipments();
   renderList();
   updateStats();
   showToast('Added to dashboard!');
@@ -651,6 +663,7 @@ function advanceToStage(id, stageIndex) {
   renderDetail(s);
   renderList();
   updateStats();
+  saveShipments();
 }
 
 function markException(id) {
@@ -659,6 +672,7 @@ function markException(id) {
   s.status = 'exception';
   s.events.push({ ...EXCEPTION_STAGE, loc: s.dest, time: now(), done: true });
   showToast('⚠ Exception marked');
+  saveShipments();
   renderDetail(s);
   renderList();
   updateStats();
@@ -667,6 +681,7 @@ function markException(id) {
 function deleteShipment(id) {
   if(!confirm('Delete this shipment?')) return;
   shipments = shipments.filter(s=>s.id!==id);
+  saveShipments();
   closeDetail();
   renderList();
   updateStats();
@@ -767,6 +782,9 @@ function showToast(msg) {
 }
 
 // ═══ INIT ══════════════════════════════════════════════════════════════
+loadShipments();
+renderList();
+updateStats();
 checkDeepLink();
 </script>
 </body>
